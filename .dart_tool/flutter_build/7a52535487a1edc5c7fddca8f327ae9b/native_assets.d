@@ -1,0 +1,1 @@
+ /Users/KHARY/irrigation_app/.dart_tool/flutter_build/7a52535487a1edc5c7fddca8f327ae9b/native_assets.yaml: 
