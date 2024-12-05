@@ -11,8 +11,9 @@ class ParcellesScreen extends StatelessWidget {
         elevation: 0,
         title: Text(
           'Mes parcelles',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black),
         ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
