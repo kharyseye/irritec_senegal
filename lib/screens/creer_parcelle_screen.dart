@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CreerParcelleScreen extends StatefulWidget {
   @override
@@ -6,8 +8,56 @@ class CreerParcelleScreen extends StatefulWidget {
 }
 
 class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
-  String? _selectedSoilType; // Pour la liste déroulante
-  bool _isIrrigationActivated = false; // Pour la checkbox
+  String? _selectedSoilType;
+  bool _isIrrigationActivated = false;
+  TextEditingController _superficieController = TextEditingController();
+  TextEditingController _planteController = TextEditingController();
+
+  Future<void> _createParcelle() async {
+    final url = Uri.parse('http://192.168.2.253:8080/parcelles');
+    final body = jsonEncode({
+      "superficie": _superficieController.text,
+      "planteCultivee": _planteController.text,
+      "typeDeSol": _selectedSoilType,
+      "etatIrrigation": "BESOIN_EAU", // Par défaut ou basé sur l'utilisateur
+      "irrigationIntelligente": _isIrrigationActivated,
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Parcelle créée avec succès !"),
+          backgroundColor: Colors.green,
+        ));
+        // Réinitialiser les champs après succès
+        _superficieController.clear();
+        _planteController.clear();
+        setState(() {
+          _selectedSoilType = null;
+          _isIrrigationActivated = false;
+        });
+      } else {
+        print('Erreur backend : ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Échec de la création de la parcelle !"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Erreur lors de la connexion au serveur."),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +84,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // Action pour ajouter une parcelle
-                  },
+                  onPressed: _createParcelle,
                   icon: Icon(Icons.add, color: Colors.white),
                   label: Text(
                     "Ajouter une parcelle",
@@ -73,9 +121,9 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInputField("Superficie : *"),
+                    _buildInputField("Superficie : *", _superficieController),
                     const SizedBox(height: 20),
-                    _buildInputField("Type de culture : *"),
+                    _buildInputField("Type de culture : *", _planteController),
                     const SizedBox(height: 20),
                     _buildDropdownField(),
                     const SizedBox(height: 20),
@@ -98,9 +146,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
                     const SizedBox(height: 30),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Action pour créer une parcelle
-                        },
+                        onPressed: _createParcelle,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           minimumSize: Size(double.infinity, 50),
@@ -124,7 +170,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
     );
   }
 
-  Widget _buildInputField(String label) {
+  Widget _buildInputField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,6 +183,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
         ),
         const SizedBox(height: 10),
         TextField(
+          controller: controller,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.green[50],
