@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ControleScreen extends StatefulWidget {
   @override
@@ -6,33 +8,59 @@ class ControleScreen extends StatefulWidget {
 }
 
 class _ControleScreenState extends State<ControleScreen> {
-  // Liste des parcelles avec les propriétés nécessaires
-  final List<Map<String, dynamic>> parcelles = [
-    {
-      "status": "Besoin d'eau",
-      //"backgroundColor": Colors.red[100]!,
-      "statusColor": Colors.red,
-      "name": "Parcelle de tomates",
-      "lastChecked": "Dernier contrôle : il y a 2 min",
-      "selected": false,
-    },
-    {
-      "status": "Bonne santé",
-      //"backgroundColor": Colors.green[100]!,
-      "statusColor": Colors.green,
-      "name": "Parcelle de maïs",
-      "lastChecked": "Dernier contrôle : il y a 5 min",
-      "selected": false,
-    },
-    {
-      "status": "Irrigation en cours",
-     // "backgroundColor": Colors.yellow[100]!,
-      "statusColor": Colors.orange,
-      "name": "Parcelle de carottes",
-      "lastChecked": "Dernier contrôle : il y a 3 min",
-      "selected": false,
-    },
-  ];
+  List<Map<String, dynamic>> parcelles = []; // Liste dynamique pour les parcelles
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchParcelles(); // Charger les parcelles au démarrage
+  }
+
+  // Méthode pour récupérer les parcelles depuis l'API
+  Future<void> _fetchParcelles() async {
+    final response = await http.get(Uri.parse('http://192.168.2.253:8080/parcelles')); // URL de l'API
+
+    if (response.statusCode == 200) {
+      final List<dynamic> parcellesData = json.decode(response.body);
+
+      // Filtrage des parcelles avec l'état BESOIN_EAU
+      final filteredParcelles = parcellesData.where((parcelle) {
+        return parcelle['etatIrrigation'] == 'BESOIN_EAU';
+      }).toList();
+
+      setState(() {
+        parcelles = filteredParcelles.map((parcelle) {
+          return {
+            "status": parcelle['etatIrrigation'], // Assurez-vous que l'attribut est correctement nommé
+            "statusColor": _getStatusColor(parcelle['etatIrrigation']), // Couleur basée sur l'état d'irrigation
+            "name": parcelle['planteCultivee'],
+            "selected": false,
+          };
+        }).toList();
+      });
+    } else {
+      // Gérer l'erreur de la requête
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Erreur de récupération des parcelles."),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+
+  // Méthode pour obtenir la couleur de statut en fonction de l'état d'irrigation
+  Color _getStatusColor(String etatIrrigation) {
+    switch (etatIrrigation) {
+      case 'BESOIN_EAU':
+        return Colors.red;
+      case 'BONNE_SANTE':
+        return Colors.green;
+      case 'IRRIGATION_EN_COURS':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +86,9 @@ class _ControleScreenState extends State<ControleScreen> {
                 children: parcelles.map((parcelle) {
                   return _buildParcelleCard(
                     status: parcelle["status"],
-                    //backgroundColor: parcelle["backgroundColor"],
                     statusColor: parcelle["statusColor"],
                     name: parcelle["name"],
-                    lastChecked: parcelle["lastChecked"],
+                    //lastChecked: parcelle["lastChecked"],
                     isSelected: parcelle["selected"],
                     onCheckboxChanged: (bool? value) {
                       setState(() {
@@ -80,7 +107,7 @@ class _ControleScreenState extends State<ControleScreen> {
                 print("Irrigation activée pour les parcelles sélectionnées");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // Couleur de fond verte
+                backgroundColor: Colors.green,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -88,25 +115,10 @@ class _ControleScreenState extends State<ControleScreen> {
               ),
               child: Text(
                 "Activer irrigation",
-                style: TextStyle(color: Colors.white), // Couleur du texte en blanc
+                style: TextStyle(color: Colors.white),
               ),
             ),
-
             SizedBox(height: 50),
-            /*ElevatedButton(
-              onPressed: () {
-                // Action pour activer la multi-irrigation
-                print("Multi-irrigation activée");
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: EdgeInsets.all(16),
-              ),
-              child: Text("Activer multi-irrigation"),
-            ),*/
           ],
         ),
       ),
@@ -116,15 +128,12 @@ class _ControleScreenState extends State<ControleScreen> {
   // Widget de construction de carte de parcelle
   Widget _buildParcelleCard({
     required String status,
-   // required Color backgroundColor,
     required Color statusColor,
     required String name,
-    required String lastChecked,
     required bool isSelected,
     required ValueChanged<bool?> onCheckboxChanged,
   }) {
     return Card(
-     // color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -140,18 +149,18 @@ class _ControleScreenState extends State<ControleScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              lastChecked,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            SizedBox(height: 4),
+            // Affichage de l'état de l'irrigation
             Text(
               status,
-              style: TextStyle(color: statusColor),
+              style: TextStyle(
+                color: statusColor, // Applique la couleur selon l'état
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
 }
