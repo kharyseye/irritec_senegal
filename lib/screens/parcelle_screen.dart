@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
-
+import 'package:irrigation_app/api/api_service.dart';
 import 'creer_parcelle_screen.dart';
 
-class ParcellesScreen extends StatelessWidget {
+class ParcellesScreen extends StatefulWidget {
+  @override
+  _ParcellesScreenState createState() => _ParcellesScreenState();
+}
+
+class _ParcellesScreenState extends State<ParcellesScreen> {
+  late Future<List<dynamic>> parcelles;
+
+  @override
+  void initState() {
+    super.initState();
+    parcelles = ApiService.fetchParcelles(); // Charge les parcelles au démarrage
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,19 +60,35 @@ class ParcellesScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            // Exemple de parcelle
             Expanded(
-              child: ListView(
-                children: [
-                  _buildParcelleCard(
-                    "Besoin d'eau",
-                    Colors.red[100]!,
-                    Colors.red,
-                    "Parcelle de tomates",
-                    "derniers contrôle environ 2mn",
-                    true,
-                  ),
-                ],
+              child: FutureBuilder<List<dynamic>>(
+                future: parcelles,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Erreur de connexion"));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text("Aucune parcelle trouvée"));
+                  }
+
+                  // Si les données sont disponibles, afficher la liste des parcelles
+                  List<dynamic> parcellesData = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: parcellesData.length,
+                    itemBuilder: (context, index) {
+                      var parcelle = parcellesData[index];
+                      return _buildParcelleCard(
+                        parcelle['etatIrrigation'], // Vous pouvez adapter selon vos données
+                        Colors.red[100]!,
+                        Colors.red,
+                        parcelle['planteCultivee'], // Assurez-vous que c'est le bon champ
+                        "Dernier contrôle: ${parcelle['superficie']} m²", // Exemple d'information supplémentaire
+                        true,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
