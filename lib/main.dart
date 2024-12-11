@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
+
       home: MainAppScreen(), // Écran d'accueil de l'application (Login)
     );
   }

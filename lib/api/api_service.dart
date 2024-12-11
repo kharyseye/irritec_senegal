@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.2.253:8080'; // URL du backend
+  static const String baseUrl = 'http://192.168.202.30:8080'; // URL du backend
 
   /// Récupérer les parcelles avec une requête GET
   static Future<List<dynamic>> fetchParcelles() async {

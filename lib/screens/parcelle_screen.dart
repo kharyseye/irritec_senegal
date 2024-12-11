@@ -19,8 +19,9 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[100],
         elevation: 0,
         title: Text(
           'Mes parcelles',
@@ -74,20 +75,25 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
 
                   // Si les données sont disponibles, afficher la liste des parcelles
                   List<dynamic> parcellesData = snapshot.data!;
-                  return ListView.builder(
+                  return ListView.separated(
                     itemCount: parcellesData.length,
                     itemBuilder: (context, index) {
                       var parcelle = parcellesData[index];
+                      String etat = parcelle['etatIrrigation'];
+                      bool isBonneSante = etat.toUpperCase() == "BONNE_SANTE";
+
                       return _buildParcelleCard(
-                        parcelle['etatIrrigation'], // Vous pouvez adapter selon vos données
-                        Colors.red[100]!,
-                        Colors.red,
-                        parcelle['planteCultivee'], // Assurez-vous que c'est le bon champ
-                        "Dernier contrôle: ${parcelle['superficie']} m²", // Exemple d'information supplémentaire
-                        true,
+                        etat, // Texte de l'état
+                        isBonneSante ? Colors.green[100]! : Colors.red[100]!, // Couleur d'arrière-plan
+                        isBonneSante ? Colors.green : Colors.red, // Couleur du texte de l'état
+                        parcelle['planteCultivee'],
+                        "Dernier contrôle: il y a 00:00",
+                        !isBonneSante, // Désactive le bouton pour BONNE_SANTE
                       );
                     },
+                    separatorBuilder: (context, index) => const SizedBox(height: 10), // Espacement entre les cartes
                   );
+
                 },
               ),
             ),
@@ -123,7 +129,7 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.asset(
-              'assets/images/parcelle.jpg', // Chemin vers ton image
+              'assets/images/parcelle.jpg',
               height: 60,
               width: 60,
               fit: BoxFit.cover,
@@ -137,13 +143,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: backgroundColor,
+                    color: backgroundColor, // Couleur d'arrière-plan
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     status,
                     style: TextStyle(
-                      color: statusColor,
+                      color: statusColor, // Couleur du texte
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -183,4 +189,5 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
       ),
     );
   }
+
 }

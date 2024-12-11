@@ -66,6 +66,8 @@ flutter:
     - assets/images/parcelle.jpg
     - assets/images/profile.png
     - assets/images/weather.png
+    - assets/images/soleil.png
+    - assets/images/femme.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

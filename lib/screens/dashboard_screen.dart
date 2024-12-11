@@ -43,21 +43,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[100],
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.settings, color: Colors.black),
-          onPressed: () {},
+        titleSpacing: 0, // Supprime le décalage par défaut du titre
+        title: Row(
+          children: [
+            const SizedBox(width: 10), // Espacement à gauche
+            Icon(Icons.location_on_outlined, color: Colors.black, size: 30), // Icône de localisation
+            const SizedBox(width: 5), // Espacement entre l'icône et le texte
+            Expanded(
+              child: Text(
+                "Dakar, Sénégal", // Texte de localisation
+                style: TextStyle(color: Colors.black, fontSize: 16),
+                overflow: TextOverflow.ellipsis, // Ajoute "..." si le texte dépasse
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Colors.black),
+            icon: Icon(Icons.notifications_none, color: Colors.black, size: 30),
             onPressed: () {},
           ),
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: CircleAvatar(
-              backgroundImage: AssetImage('assets/images/profile.png'),
+              backgroundImage: AssetImage('assets/images/femme.png'),
             ),
           ),
         ],
@@ -71,9 +82,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/weather.png', width: 80, height: 80),
+                  Image.asset('assets/images/soleil.png', width: 150, height: 150),
                   Text(
-                    "24°",
+                    "27°",
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -92,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildWeatherIndicator("77%", "Humidité"),
+                _buildWeatherIndicator("65%", "Humidité"),
                 _buildWeatherIndicator("<0,004", "Précipitation"),
                 _buildWeatherIndicator("14km/h", "Vent"),
               ],
@@ -147,7 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildInfoCard(
                     "Température",
-                    _dhtSensorData != null ? "${_dhtSensorData!.temperature}°C" : "35ºC",
+                    _dhtSensorData != null ? "${_dhtSensorData!.temperature}°C" : "28ºC",
                     Colors.green,
                     Icons.thermostat,
                   ),
@@ -156,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildInfoCard(
                     "Humidité",
-                    _dhtSensorData != null ? "${_dhtSensorData!.humidity}%" : "56%",
+                    _dhtSensorData != null ? "${_dhtSensorData!.humidity}%" : "67%",
                     Colors.blue,
                     Icons.water_drop,
                   ),
