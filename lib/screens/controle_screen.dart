@@ -101,24 +101,25 @@ class _ControleScreenState extends State<ControleScreen> {
             ),
             // Boutons en bas
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Action pour activer l'irrigation
-                print("Irrigation activée pour les parcelles sélectionnées");
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: EdgeInsets.all(16),
-              ),
-              child: Text(
-                "Activer irrigation",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            SizedBox(height: 50),
+
+          ElevatedButton(
+          onPressed: () {
+            _activateIrrigation();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          padding: EdgeInsets.all(16),
+      ),
+      child: Text(
+      "Activer irrigation",
+      style: TextStyle(color: Colors.white),
+      ),
+    ),
+
+    SizedBox(height: 50),
           ],
         ),
       ),
@@ -162,5 +163,49 @@ class _ControleScreenState extends State<ControleScreen> {
       ),
     );
   }
+  void _activateIrrigation() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Empêche de fermer en cliquant en dehors
+      builder: (BuildContext context) {
+        // Affiche une animation (exemple : spinner)
+        return AlertDialog(
+          title: Text("Activation en cours"),
+          content: Row(
+            children: [
+              CircularProgressIndicator(), // Animation spinner
+              SizedBox(width: 16),
+              Expanded(child: Text("L'irrigation est en train de s'activer...")),
+            ],
+          ),
+        );
+      },
+    );
+
+    // Simule un délai pour l'activation (peut être remplacé par une requête HTTP)
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.of(context).pop(); // Ferme le dialogue d'animation
+
+      // Affiche un popup de confirmation
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Succès"),
+            content: Text("L'irrigation a été activée avec succès !"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Ferme le popup
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
 
 }

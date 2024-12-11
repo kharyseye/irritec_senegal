@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:irrigation_app/screens/parcelle_screen.dart';
-import 'package:irrigation_app/screens/programme_screen.dart';
-import 'package:irrigation_app/screens/suivi_screen.dart';
+import '../api/dhtSensorService.dart';
+import '../sensor/dhtsensor.dart';
 
-import 'controle_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -11,42 +10,32 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  //int _currentIndex = 0; // Index de la page active
+  DhtSensor? _dhtSensorData; // Variable pour stocker les données récupérées
+  final DhtSensorService _dhtSensorService = DhtSensorService();
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchDhtSensorData(); // Récupérer les données au démarrage
+  }
+
+  // Fonction pour récupérer les données
+  Future<void> _fetchDhtSensorData() async {
+    try {
+      final DhtSensor data = await _dhtSensorService.getDhtSensorData();
+      setState(() {
+        _dhtSensorData = data; // Mettre à jour les données dans l'état
+      });
+    } catch (e) {
+      // Gérer les erreurs de récupération des données
+      print('Erreur lors de la récupération des données : $e');
+    }
+  }
   void _navigateToPage(int index) {
     setState(() {
-    //  _currentIndex = index;
+
     });
 
-  /*  switch (index) {
-      case 0:
-      // Rester sur le Dashboard
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ParcellesScreen()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SuiviScreen()), // Écran de suivi
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ProgrammeScreen()), // Écran de programme
-        );
-        break;
-      case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ControleScreen()), // Écran de contrôle
-        );
-        break;
-    }*/
   }
 
   @override
@@ -158,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildInfoCard(
                     "Température",
-                    "24°C",
+                    _dhtSensorData != null ? "${_dhtSensorData!.temperature}°C" : "35ºC",
                     Colors.green,
                     Icons.thermostat,
                   ),
@@ -167,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: _buildInfoCard(
                     "Humidité",
-                    "77%",
+                    _dhtSensorData != null ? "${_dhtSensorData!.humidity}%" : "56%",
                     Colors.blue,
                     Icons.water_drop,
                   ),
@@ -177,108 +166,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-     /*bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _navigateToPage,
-        items: [
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(
-                  Icons.home,
-                  size: 32, // Taille agrandie
-                  color: _currentIndex == 0 ? Colors.green : Colors.grey,
-                ),
-                Text(
-                  "Home",
-                  style: TextStyle(
-                    color: _currentIndex == 0 ? Colors.green : Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(
-                  Icons.grass,
-                  size: 32, // Taille agrandie
-                  color: _currentIndex == 1 ? Colors.green : Colors.grey,
-                ),
-                Text(
-                  "Parcelles",
-                  style: TextStyle(
-                    color: _currentIndex == 1 ? Colors.green : Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(
-                  Icons.track_changes,
-                  size: 32, // Taille agrandie
-                  color: _currentIndex == 2 ? Colors.green : Colors.grey,
-                ),
-                Text(
-                  "Suivi",
-                  style: TextStyle(
-                    color: _currentIndex == 2 ? Colors.green : Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(
-                  Icons.list,
-                  size: 32, // Taille agrandie
-                  color: _currentIndex == 3 ? Colors.green : Colors.grey,
-                ),
-                Text(
-                  "Programme",
-                  style: TextStyle(
-                    color: _currentIndex == 3 ? Colors.green : Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                Icon(
-                  Icons.control_camera,
-                  size: 32, // Taille agrandie
-                  color: _currentIndex == 4 ? Colors.green : Colors.grey,
-                ),
-                Text(
-                  "Contrôle",
-                  style: TextStyle(
-                    color: _currentIndex == 4 ? Colors.green : Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            label: "",
-          ),
-        ],
-      ),*/
-
     );
   }
 
