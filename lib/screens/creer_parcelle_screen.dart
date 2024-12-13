@@ -14,7 +14,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
   TextEditingController _planteController = TextEditingController();
 
   Future<void> _createParcelle() async {
-    final url = Uri.parse('http://192.168.2.253:8080/parcelles');
+    final url = Uri.parse('http://192.168.5.118:8080/parcelles');
     final body = jsonEncode({
       "superficie": _superficieController.text,
       "planteCultivee": _planteController.text,
