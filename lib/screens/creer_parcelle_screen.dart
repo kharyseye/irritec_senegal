@@ -134,12 +134,6 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
           'Mes parcelles',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
       body: Column(
         children: [
