@@ -13,6 +13,7 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
   TextEditingController _superficieController = TextEditingController();
   TextEditingController _planteController = TextEditingController();
 
+/*
   Future<void> _createParcelle() async {
     final url = Uri.parse('http://192.168.5.118:8080/parcelles');
     final body = jsonEncode({
@@ -57,7 +58,71 @@ class _CreerParcelleScreenState extends State<CreerParcelleScreen> {
       ));
     }
   }
+*/
 
+  Future<void> _createParcelle() async {
+    final url = Uri.parse('http://192.168.5.118:8080/parcelles');
+    final body = jsonEncode({
+      "superficie": _superficieController.text,
+      "planteCultivee": _planteController.text,
+      "typeDeSol": _selectedSoilType,
+      "etatIrrigation": "BESOIN_EAU",
+      "irrigationIntelligente": _isIrrigationActivated,
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      if (response.statusCode == 201) {
+        // Récupérer le nom de la parcelle ou utiliser un champ saisi
+        final parcelleName = _planteController.text;
+
+        // Réinitialiser les champs après succès
+        _superficieController.clear();
+        _planteController.clear();
+        setState(() {
+          _selectedSoilType = null;
+          _isIrrigationActivated = false;
+        });
+
+        // Afficher la pop-up de confirmation
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Parcelle créée"),
+              content: Text("La parcelle \"$parcelleName\" a été créée avec succès."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Ferme la boîte de dialogue
+                    Navigator.pushReplacementNamed(context, '/parcelle'); // Navigue vers la page
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        print('Erreur backend : ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Échec de la création de la parcelle !"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Erreur lors de la connexion au serveur."),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

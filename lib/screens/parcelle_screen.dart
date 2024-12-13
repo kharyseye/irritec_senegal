@@ -37,14 +37,17 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // Naviguer vers la page de création
-                    Navigator.push(
+                  onPressed: () async {
+                    // Naviguer vers la page de création et recharger la liste après retour
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => CreerParcelleScreen(),
                       ),
                     );
+                    setState(() {
+                      parcelles = ApiService.fetchParcelles();
+                    });
                   },
                   icon: Icon(Icons.add, color: Colors.white),
                   label: Text(
@@ -68,7 +71,26 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text("Erreur de connexion"));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Erreur de connexion",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                parcelles = ApiService.fetchParcelles();
+                              });
+                            },
+                            child: Text("Réessayer"),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text("Aucune parcelle trouvée"));
                   }
@@ -86,14 +108,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                         etat, // Texte de l'état
                         isBonneSante ? Colors.green[100]! : Colors.red[100]!, // Couleur d'arrière-plan
                         isBonneSante ? Colors.green : Colors.red, // Couleur du texte de l'état
-                        parcelle['planteCultivee'],
-                        "Dernier contrôle: il y a 00:00",
+                        parcelle['planteCultivee'] ?? "Inconnu",
+                        "Dernier contrôle: il y a 00:00", // Exemple de texte pour le contrôle
                         !isBonneSante, // Désactive le bouton pour BONNE_SANTE
                       );
                     },
-                    separatorBuilder: (context, index) => const SizedBox(height: 10), // Espacement entre les cartes
+                    separatorBuilder: (context, index) => const SizedBox(height: 10),
                   );
-
                 },
               ),
             ),
@@ -143,13 +164,13 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: backgroundColor, // Couleur d'arrière-plan
+                    color: backgroundColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     status,
                     style: TextStyle(
-                      color: statusColor, // Couleur du texte
+                      color: statusColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -189,5 +210,4 @@ class _ParcellesScreenState extends State<ParcellesScreen> {
       ),
     );
   }
-
 }
